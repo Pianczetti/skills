@@ -337,13 +337,14 @@ Ask the user:
 
 - Order columns strictly: `BulkActionColumn` first, then `PositionColumn` (only if positionable), then data columns, then `ActionColumn` last. Reviewers and the BO Twig macros assume that order.
 - Make every column id snake_case AND identical to the SQL alias from the query builder (`v.id_voucher AS id_voucher`). The `field:` option in the column points at this alias.
-- Always parameterise filter values with `setParameter()` and a typed binding (`PDO::PARAM_BOOL`, `PARAM_INT`).
+- Always parameterise filter values with `setParameter()` and a typed binding (`PDO::PARAM_BOOL`, `PARAM_INT`). String concatenation in SQL is a SQL-injection vector.
 - Use `parent: prestashop.core.grid.definition.factory.abstract_grid_definition` and `parent: prestashop.core.grid.abstract_query_builder` for service wiring; they inject the right constructor args and apply the required tags automatically.
 
 ## Don't
 
 - Don't use `HelperList` for new BO listings. Grids expose filtering, bulk actions, hooks and the modern column types; HelperList is the legacy path.
 - Don't put `ORDER BY`, `LIMIT` or `OFFSET` inside `getCountQueryBuilder()`. Pagination MUST NOT leak into the count or the grid will report wrong totals.
+- Don't concatenate user input into SQL (`->andWhere("code = '$code'")`). Use `:code` + `setParameter('code', $code)` even for "trusted" filters.
 - Don't return Doctrine entities or `ObjectModel` objects from the query builder; the Grid expects flat associative rows keyed by the SQL alias.
 - Don't omit `_legacy_controller` from the routes - the BO permission system and the bulk-action submit URL both need it.
 
