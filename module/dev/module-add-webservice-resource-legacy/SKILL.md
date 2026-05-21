@@ -1,5 +1,5 @@
 ---
-name: module-add-webservice-resource
+name: module-add-webservice-resource-legacy
 description: Expose an entity through PrestaShop 9's legacy /api/ webservice by hooking addWebserviceResources from the module class. Use ONLY when integrating with a third-party that has not migrated to the modern Admin API.
 ---
 
