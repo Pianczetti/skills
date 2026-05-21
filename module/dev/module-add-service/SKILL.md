@@ -7,7 +7,7 @@ description: Register a Symfony service in a PrestaShop 9 module via config/serv
 
 Ask the user:
 * The service class FQCN under the module's PSR-4 namespace (e.g. `MyVendor\Mymodule\Service\OrderExporter`).
-* Constructor dependencies. Note whether they are core PrestaShop services (e.g. `Doctrine\ORM\EntityManagerInterface`, `Symfony\Contracts\Translation\TranslatorInterface`, `PrestaShopBundle\Service\Hook\HookDispatcherInterface`) or sibling module services.
+* Constructor dependencies. Note whether they are core PrestaShop services (e.g. `Doctrine\ORM\EntityManagerInterface`, `Symfony\Contracts\Translation\TranslatorInterface`, `PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface`) or sibling module services.
 * Whether the service must be public. Default is private; mark public ONLY if the service is fetched from the container by name (e.g. by a legacy controller via `$this->module->get('...')` or a hook listener resolved by tag).
 * Any tags the service must carry (`prestashop.form.identifiable_object.builder`, `kernel.event_listener`, `console.command`, ...).
 

@@ -97,7 +97,7 @@ Ask the user:
 ## Do
 
 - Use `$this->trans('...', [], 'Modules.Mymodule.<area>')` for every user-facing string. See `module-add-translations-new`.
-- Inject `PrestaShopBundle\Service\Hook\HookDispatcherInterface` into your services to dispatch hooks.
+- Inject `PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface` into your services to dispatch hooks.
 - Declare every service in `config/services.yml` and let autowiring resolve constructor arguments.
 - Keep the main module class thin: it is a registration point, not a place for business logic.
 
