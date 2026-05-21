@@ -150,7 +150,7 @@ Ask the user:
 ## Don't
 
 - Don't write a Symfony controller for these endpoints. The CQRS attributes wire the bus automatically; a controller bypasses the API Platform serialisation, scope check and OpenAPI generation.
-- Don't reuse a core scope (`customer_read`, `product_write`, ...) for a module endpoint. Module scopes must be namespaced with `module_<modulename>_` so merchants can audit them in the API Client form.
+- Don't reuse a core scope (`customer_read`, `product_write`, ...) for a module endpoint. We recommend prefixing module-owned scopes with `module_<modulename>_` so merchants can audit them in the API Client form and so collisions with current or future core scopes are unambiguous; this is a convention, not a framework rule.
 - Don't return Doctrine entities or `ObjectModel` instances from the underlying Query handler. The DTO is the contract; the handler returns a flat result that maps onto its public properties.
 - Don't put the resource files outside `src/ApiPlatform/Resources/`. PrestaShopExtension's auto-scan only looks there; resources placed elsewhere are silently ignored.
 - Don't authenticate with cookies or admin sessions. The Admin API is OAuth2-only and rejects every request that does not carry a valid `Authorization: Bearer` header.

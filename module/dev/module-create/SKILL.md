@@ -6,7 +6,7 @@ description: Scaffold a new PrestaShop 9 module with the modern Symfony layout (
 ## Requirements
 
 Ask the user:
-* Module technical name in `lower_snake_case`. The folder, the main PHP class (in PascalCase), the `$this->name` property, the PSR-4 namespace and the translation domain prefix all derive from it. Example: `mymodule` → class `Mymodule`, namespace `MyVendor\Mymodule\`, domain `Modules.Mymodule.*`.
+* Module technical name in `lower_snake_case`. The folder, the main PHP class (in PascalCase), the `$this->name` property, the PSR-4 namespace and the translation domain prefix all derive from it. Example: `mymodule` → class `Mymodule`, namespace `Acme\Mymodule\` (matching the Composer name `acme/mymodule`), domain `Modules.Mymodule.*`.
 * Display name shown in the Back Office (`$this->displayName`).
 * Author / vendor.
 * Initial version (e.g. `1.0.0`).
@@ -72,7 +72,7 @@ Ask the user:
 
     ```json
     { "name": "acme/mymodule", "type": "prestashop-module",
-      "autoload": { "psr-4": { "MyVendor\\Mymodule\\": "src/" } },
+      "autoload": { "psr-4": { "Acme\\Mymodule\\": "src/" } },
       "config": { "preferred-install": "dist" } }
     ```
 
@@ -85,7 +85,7 @@ Ask the user:
         autoconfigure: true
         public: false
 
-      MyVendor\Mymodule\:
+      Acme\Mymodule\:
         resource: '../src/*'
         exclude: '../src/{Entity,DTO}'
     ```
