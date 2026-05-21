@@ -1,6 +1,6 @@
 ---
 name: module-add-cqrs-command
-description: Scaffold a CQRS Command and CommandHandler in a PrestaShop 9 module to mutate state via the Tactician bus instead of ObjectModel. Use when the user wants to create, update, delete or otherwise change an aggregate from a controller, console command, or hook listener.
+description: Scaffold a CQRS Command and CommandHandler in a PrestaShop 9 module to mutate state via the Symfony Messenger command bus instead of ObjectModel. Use when the user wants to create, update, delete or otherwise change an aggregate from a controller, console command, or hook listener.
 ---
 
 ## Requirements
@@ -51,7 +51,7 @@ Ask the user:
     }
     ```
 
-3. Write the CommandHandler interface alongside the command handler. The bus uses the interface for autowiring and the implementation for execution:
+3. Write the CommandHandler interface alongside the command handler. Mark the handler class with `#[AsCommandHandler]` from `PrestaShop\PrestaShop\Core\CommandBus\Attributes\` so PrestaShop's `CommandAndQueryRegisterPass` auto-tags it as a `messenger.message_handler` with `handles:` derived from the typed `handle()` parameter:
 
     ```php
     <?php
@@ -75,7 +75,9 @@ Ask the user:
     use MyVendor\Mymodule\Domain\Voucher\Exception\VoucherException;
     use MyVendor\Mymodule\Domain\Voucher\ValueObject\VoucherId;
     use MyVendor\Mymodule\Entity\Voucher;
+    use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 
+    #[AsCommandHandler]
     final class CreateVoucherHandler implements CreateVoucherCommandHandlerInterface
     {
         public function __construct(private readonly EntityManagerInterface $em) {}
@@ -107,15 +109,14 @@ Ask the user:
     final class VoucherNotFoundException extends VoucherException {}
     ```
 
-5. Register the handler in `config/services.yml` with the `tactician.handler` tag. The `command:` key MUST be the Command FQCN, not the handler FQCN:
+5. Registration is automatic. With the default `services.yml` from `module-create` (`autowire: true`, `autoconfigure: true`, `resource:` glob over `src/`), the `#[AsCommandHandler]` attribute is picked up by `PrestaShopBundle\DependencyInjection\Compiler\CommandAndQueryRegisterPass`, which adds `messenger.message_handler` with `handles: <CommandFQCN>` (read from the typed `handle()` parameter). Do NOT add a `tactician.handler` tag - PS 9 ships Symfony Messenger and that tag is unused. If you cannot use attributes (PHP < 8 code path), tag the service manually:
 
     ```yaml
     services:
       MyVendor\Mymodule\Domain\Voucher\CommandHandler\CreateVoucherHandler:
         autowire: true
-        public: true
         tags:
-          - { name: 'tactician.handler', command: 'MyVendor\Mymodule\Domain\Voucher\Command\CreateVoucherCommand' }
+          - { name: 'messenger.message_handler', handles: 'MyVendor\Mymodule\Domain\Voucher\Command\CreateVoucherCommand' }
     ```
 
 6. Dispatch from a modern admin controller. Inject `PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface` (the same bus instance handles commands and queries) and call `handle()`:

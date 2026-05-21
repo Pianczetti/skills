@@ -1,6 +1,6 @@
 ---
 name: module-add-cqrs-query
-description: Scaffold a CQRS Query and QueryHandler in a PrestaShop 9 module to read data through the Tactician bus instead of pulling Doctrine entities or ObjectModels directly into a controller. Use when the user wants to fetch data for a Back Office page, an API endpoint, or a presenter.
+description: Scaffold a CQRS Query and QueryHandler in a PrestaShop 9 module to read data through the Symfony Messenger query bus instead of pulling Doctrine entities or ObjectModels directly into a controller. Use when the user wants to fetch data for a Back Office page, an API endpoint, or a presenter.
 ---
 
 ## Requirements
@@ -40,7 +40,7 @@ Ask the user:
     }
     ```
 
-3. Define the QueryHandler interface and its implementation. The handler reads from Doctrine repositories or DBAL but never returns the underlying entity:
+3. Define the QueryHandler interface and its implementation. Mark the implementation with `#[AsQueryHandler]` from `PrestaShop\PrestaShop\Core\CommandBus\Attributes\` so PrestaShop's `CommandAndQueryRegisterPass` auto-tags it as `messenger.message_handler` with the Query FQCN derived from the typed `handle()` parameter. The handler reads from Doctrine repositories or DBAL but never returns the underlying entity:
 
     ```php
     <?php
@@ -63,7 +63,9 @@ Ask the user:
     use MyVendor\Mymodule\Domain\Voucher\Query\GetVoucherForEditing;
     use MyVendor\Mymodule\Domain\Voucher\QueryResult\EditableVoucher;
     use MyVendor\Mymodule\Repository\VoucherRepository;
+    use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 
+    #[AsQueryHandler]
     final class GetVoucherForEditingHandler implements GetVoucherForEditingHandlerInterface
     {
         public function __construct(private readonly VoucherRepository $repository) {}
@@ -100,15 +102,14 @@ Ask the user:
     }
     ```
 
-5. Register the handler in `config/services.yml` with the `tactician.handler` tag pointing at the Query FQCN:
+5. Registration is automatic. With the default `services.yml` from `module-create` (`autowire: true`, `autoconfigure: true`, `resource:` glob over `src/`), the `#[AsQueryHandler]` attribute is picked up by `PrestaShopBundle\DependencyInjection\Compiler\CommandAndQueryRegisterPass`, which adds `messenger.message_handler` with `handles: <QueryFQCN>`. Do NOT add a `tactician.handler` tag - PS 9 ships Symfony Messenger and that tag is unused. If you cannot use attributes, tag the service manually:
 
     ```yaml
     services:
       MyVendor\Mymodule\Domain\Voucher\QueryHandler\GetVoucherForEditingHandler:
         autowire: true
-        public: true
         tags:
-          - { name: 'tactician.handler', command: 'MyVendor\Mymodule\Domain\Voucher\Query\GetVoucherForEditing' }
+          - { name: 'messenger.message_handler', handles: 'MyVendor\Mymodule\Domain\Voucher\Query\GetVoucherForEditing' }
     ```
 
 6. Dispatch from a modern admin controller. Use the same bus interface as for commands; PrestaShop wires the query bus under `prestashop.core.query_bus`:
@@ -150,7 +151,7 @@ Ask the user:
     bin/console prestashop:list:commands-and-queries
     ```
 
-   The command lists every Tactician handler registered in the container, with the Command/Query FQCN it accepts. Reuse a core query (e.g. `GetCustomerForViewing`, `SearchProducts`) when one exists rather than duplicating it in your module.
+   The command lists every command and query handler the bus knows about (each one declares its `handles:` class via `#[AsCommandHandler]` / `#[AsQueryHandler]` and is wired into Symfony Messenger by `CommandAndQueryRegisterPass`), with the Command/Query FQCN it accepts. Reuse a core query (e.g. `GetCustomerForViewing`, `SearchProducts`) when one exists rather than duplicating it in your module.
 
 ## Do
 

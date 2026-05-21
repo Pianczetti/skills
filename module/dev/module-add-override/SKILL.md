@@ -77,7 +77,7 @@ Ask the user:
 
 - Prefer a HOOK first. Run `bin/console prestashop:update:hooks-documentation` to see if a `display*` or `action*` hook already covers the call site.
 - Prefer a SERVICE DECORATOR for any modern Symfony service. Implement `Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface` or use `#[AsDecorator]` to wrap the core service without touching its class.
-- Prefer a CQRS COMMAND HANDLER for domain mutations. Subscribe via `tactician.handler` or write a domain event listener.
+- Prefer a CQRS COMMAND HANDLER for domain mutations. Mark it with `#[AsCommandHandler]` (PrestaShop\PrestaShop\Core\CommandBus\Attributes) so Symfony Messenger picks it up, or write a domain event listener.
 - Keep overrides surgical: one method, one class, with `parent::` call + comment explaining why a hook was not enough.
 - Add the override to the module README with the file path and method name so collisions can be diagnosed.
 
