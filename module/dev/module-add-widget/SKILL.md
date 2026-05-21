@@ -68,7 +68,7 @@ Ask the user:
 
 5. PrestaShop wraps every widget call with the Smarty template cache. To force a refresh on configuration change, call `$this->_clearCache('widget.tpl')` from the FormDataProvider's `setData()` or from any `Configuration::updateValue` site.
 
-6. To render the widget anywhere outside its registered hooks (e.g. another module, a CMS page), call `Hook::exec('displayHome', [], $idModule)` from the rendering side - or, even better, dispatch through `HookDispatcherInterface::dispatchRenderingWithParameters('displayHome', [...])`. See `module-register-hooks`.
+6. To render the widget anywhere outside its registered hooks (e.g. another module, a CMS page), inject `PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface` and call `dispatchRenderingWithParameters('displayHome', ['idModule' => $idModule])`. The dispatcher returns a `RenderedHookInterface` whose `getContent()` is the rendered HTML. See `module-register-hooks`.
 
 ## Do
 
