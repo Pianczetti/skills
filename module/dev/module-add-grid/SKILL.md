@@ -312,7 +312,7 @@ Ask the user:
     {% endblock %}
     ```
 
-7. Add the routes in `config/routes.yml`. The grid needs at minimum an index, a search (POST on the same path), and one AJAX route per `ToggleColumn`. Toggle routes return JSON:
+7. Add the routes in `config/routes.yml`. At minimum an index and a search (POST on the same path):
 
     ```yaml
     mymodule_voucher_index:
@@ -329,52 +329,32 @@ Ask the user:
       defaults:
         _controller: 'MyVendor\Mymodule\Controller\Admin\VoucherController::searchAction'
         _legacy_controller: 'AdminMymoduleVouchers'
-
-    mymodule_voucher_toggle_active:
-      path: /modules/mymodule/vouchers/{voucherId}/toggle-active
-      methods: [POST]
-      defaults:
-        _controller: 'MyVendor\Mymodule\Controller\Admin\VoucherController::toggleActiveAction'
-        _legacy_controller: 'AdminMymoduleVouchers'
-      requirements:
-        voucherId: '\d+'
     ```
 
-   The toggle action returns JSON so the Grid's JavaScript can flip the icon without reloading:
-
-    ```php
-    public function toggleActiveAction(int $voucherId, ToggleVoucherActiveCommandHandler $handler): JsonResponse
-    {
-        try {
-            $handler->handle(new ToggleVoucherActiveCommand($voucherId));
-            return new JsonResponse(['status' => true, 'message' => $this->trans('Updated.', [], 'Admin.Notifications.Success')]);
-        } catch (\Throwable $e) {
-            return new JsonResponse(['status' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-    ```
+   For each `ToggleColumn` add a `POST /...{id}/toggle-<field>` route whose action returns a JSON `{status, message}` payload (the Grid front-end script expects this shape) and dispatches a `Toggle<X>Command` via the bus. Same pattern for bulk-action endpoints. Build them as standard CQRS commands - see `module-add-cqrs-command`.
 
 ## Do
 
 - Order columns strictly: `BulkActionColumn` first, then `PositionColumn` (only if positionable), then data columns, then `ActionColumn` last. Reviewers and the BO Twig macros assume that order.
 - Make every column id snake_case AND identical to the SQL alias from the query builder (`v.id_voucher AS id_voucher`). The `field:` option in the column points at this alias.
-- Always parameterise filter values with `setParameter()` and a typed binding (`PDO::PARAM_BOOL`, `PARAM_INT`). String concatenation in SQL is a SQL-injection vector.
+- Always parameterise filter values with `setParameter()` and a typed binding (`PDO::PARAM_BOOL`, `PARAM_INT`).
 - Use `parent: prestashop.core.grid.definition.factory.abstract_grid_definition` and `parent: prestashop.core.grid.abstract_query_builder` for service wiring; they inject the right constructor args and apply the required tags automatically.
-- Pair every `ToggleColumn` with a dedicated `POST` AJAX route returning a JSON payload (`{status, message}`). The Grid front-end script expects this shape.
 
 ## Don't
 
 - Don't use `HelperList` for new BO listings. Grids expose filtering, bulk actions, hooks and the modern column types; HelperList is the legacy path.
 - Don't put `ORDER BY`, `LIMIT` or `OFFSET` inside `getCountQueryBuilder()`. Pagination MUST NOT leak into the count or the grid will report wrong totals.
-- Don't concatenate user input into SQL (`->andWhere("code = '$code'")`). Use `:code` + `setParameter('code', $code)` even for "trusted" filters.
 - Don't return Doctrine entities or `ObjectModel` objects from the query builder; the Grid expects flat associative rows keyed by the SQL alias.
 - Don't omit `_legacy_controller` from the routes - the BO permission system and the bulk-action submit URL both need it.
 
 ## Canonical examples
 
-- [devdocs - Grid component](https://devdocs.prestashop-project.org/9/development/components/grid/) (definition factories, columns, filters, query builders).
-- Working sample wired exactly like a module: [`example-modules/demo_grid`](https://github.com/PrestaShop/example-modules/tree/master/demo_grid) (Doctrine query builder + grid factory + Twig template + filters class + controller).
-- Hook-based extension over an existing core grid: [`example-modules/demoextendgrid`](https://github.com/PrestaShop/example-modules/tree/master/demoextendgrid).
-- Reference factory: [`CustomerGridDefinitionFactory`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Definition/Factory/CustomerGridDefinitionFactory.php) (column ordering, ToggleColumn, ActionColumn, BadgeColumn).
-- Reference query builder: [`CustomerQueryBuilder`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Query/CustomerQueryBuilder.php) (parameterised filters, count vs search separation, `DoctrineSearchCriteriaApplicatorInterface`).
-- Abstract base classes: [`AbstractGridDefinitionFactory`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Definition/Factory/AbstractGridDefinitionFactory.php), [`AbstractDoctrineQueryBuilder`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Query/AbstractDoctrineQueryBuilder.php).
+- [devdocs - Grid component](https://devdocs.prestashop-project.org/9/development/components/grid/).
+- Working sample wired like a module: [`example-modules/demo_grid`](https://github.com/PrestaShop/example-modules/tree/master/demo_grid). Hook-based extension: [`example-modules/demoextendgrid`](https://github.com/PrestaShop/example-modules/tree/master/demoextendgrid).
+- Reference factory and query builder: [`CustomerGridDefinitionFactory`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Definition/Factory/CustomerGridDefinitionFactory.php), [`CustomerQueryBuilder`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Query/CustomerQueryBuilder.php).
+- Abstract bases: [`AbstractGridDefinitionFactory`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Definition/Factory/AbstractGridDefinitionFactory.php), [`AbstractDoctrineQueryBuilder`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/Grid/Query/AbstractDoctrineQueryBuilder.php).
+
+## Related skills
+
+- `module-add-cqrs-command` for the toggle / bulk-action handlers dispatched from the JSON routes above.
+- `module-add-symfony-route` for the route declaration cheatsheet (`_legacy_controller`, `_legacy_link`).
