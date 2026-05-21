@@ -9,7 +9,7 @@ Ask the user:
 * Resource name in PascalCase singular (e.g. `Voucher`, `Subscription`). The class lives at `src/ApiPlatform/Resources/<Resource>/<Resource>.php`.
 * URI prefix in `kebab-case` plural (e.g. `/vouchers`). API Platform mounts it under `/admin-api/...` automatically.
 * Allowed operations: any combination of `GET`, `POST`, `PATCH`, `DELETE`. Each maps to a CQRS attribute below.
-* OAuth2 scope names in `lower_snake_case`, prefixed with `module_<modulename>_<resource>_` to avoid collisions with core scopes (`customer_read`, `product_write`, etc.). Two scopes per resource is the standard split: `module_mymod_voucher_read` and `module_mymod_voucher_write`.
+* OAuth2 scope names in `lower_snake_case`. We recommend prefixing them with `module_<modulename>_<resource>_` to avoid collisions with core scopes (`customer_read`, `product_write`, etc.); this is a convention, not a framework rule. Two scopes per resource is the standard split: `module_mymod_voucher_read` and `module_mymod_voucher_write`.
 * Existing CQRS Command/Query FQCNs that the operations will dispatch. Each operation references one. If they do not exist yet, create them first via [`module-add-cqrs-command`](../module-add-cqrs-command/SKILL.md) and [`module-add-cqrs-query`](../module-add-cqrs-query/SKILL.md) - the API resource is a thin DTO; all business logic lives in the handlers.
 
 ## Steps
@@ -142,7 +142,7 @@ Ask the user:
 
 ## Do
 
-- Use the same scope-naming convention everywhere in the module: `module_<modulename>_<resource>_read` and `module_<modulename>_<resource>_write`. Two scopes per resource is enough; finer-grained scopes are rarely worth the matrix explosion.
+- Use the same scope-naming convention everywhere in the module; we recommend `module_<modulename>_<resource>_read` and `module_<modulename>_<resource>_write`. Two scopes per resource is enough; finer-grained scopes are rarely worth the matrix explosion.
 - Keep the resource class field-list minimal. Properties not present in a request payload are ignored by the framework; you do not need a separate DTO per operation as long as the same shape makes sense.
 - Map domain exceptions to HTTP status codes via `exceptionToStatus`. The framework otherwise returns 500 on every uncaught domain exception.
 - Validate inputs with Symfony validator constraints on the DTO properties (`#[Assert\NotBlank(groups: ['Create'])]`) and reference the group via `validationContext` on `CQRSCreate`. The bus does not re-validate.
