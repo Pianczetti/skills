@@ -110,6 +110,29 @@ skills currently available:
 | `dev` | `theme-tdd-component` | **theme-tdd-component** | Drive a PrestaShop 9 theme component from a failing test - a Jest or Vitest unit test against a JSDOM fixture for behaviour, a Storybook story for visual review, and a Playwright E2E spec on a real PS instance for the full integration. Use whenever a new BEM component carries non-trivial JavaScript behaviour (cart updates, accordion, quick view, mobile menu). |
 | `dev` | `theme-validate` | **theme-validate** | Validate a PrestaShop 9 theme's structure end-to-end before packaging - YAML lint on `config/theme.yml`, required keys, `preview.png` dimensions (500 x 746), every `assets.css` / `assets.js` path resolves to a real file, install / uninstall round-trip via the CLI, and the official online Validator. Use as the last gate before `theme-export`. |
 
+### Domain: `migration`
+
+| Category | Skill Folder | Skill Name | Description |
+| -------- | ------------ | ---------- | ----------- |
+| `dev` | `migrate-admin-controller` | **migrate-admin-controller** | Convert a legacy AdminXxxController (extends ModuleAdminController) to a modern Symfony controller extending PrestaShopAdminController with routing, security attributes, and Twig rendering. Use when a module has a Back Office page served by an AdminController that must be migrated to the PS 9 architecture. |
+| `dev` | `migrate-helperform-to-symfony-form` | **migrate-helperform-to-symfony-form** | Replace a HelperForm-based configuration page (getContent + renderForm) with Symfony FormType + FormHandler + FormDataProvider + Twig template. Use when a module uses the legacy HelperForm pattern for its settings and must migrate to the PS 9 modern form architecture. |
+| `dev` | `migrate-helperlist-to-grid` | **migrate-helperlist-to-grid** | Replace a HelperList-based Back Office listing with the modern Grid component (GridDefinitionFactory + Doctrine QueryBuilder + filters + actions + Twig macro). Use when a module renders a table via HelperList and must migrate to the PS 9 Grid architecture. |
+| `dev` | `migrate-objectmodel-to-cqrs` | **migrate-objectmodel-to-cqrs** | Replace ObjectModel CRUD calls (new MyObject(), ->add(), ->update(), ->delete()) with CQRS Commands and Queries dispatched on the Symfony Messenger bus. Use when a module mutates state via ObjectModel directly and must adopt the PS 9 domain-driven architecture. |
+| `dev` | `migrate-objectmodel-to-doctrine` | **migrate-objectmodel-to-doctrine** | Replace an ObjectModel class (with public static $definition) with a Doctrine ORM entity, ServiceEntityRepository, and proper DI wiring. Use when a module defines persistence via ObjectModel and must migrate to Doctrine for PS 9 compatibility. |
+| `dev` | `migrate-hook-exec-to-dispatcher` | **migrate-hook-exec-to-dispatcher** | Replace all Hook::exec() static calls with HookDispatcherInterface injection and dispatchWithParameters(). Use when a module dispatches hooks via the legacy static helper and must adopt the PS 9 service-based dispatcher. |
+| `dev` | `migrate-legacy-translations` | **migrate-legacy-translations** | Replace $this->l('...') and $module->l(...) calls with Symfony Translator using Modules.<Modulename>.<Domain> keys and XLIFF catalogues. Use when a module uses the legacy translation helper and must migrate to the PS 9 XLIFF-based translation system. |
+| `dev` | `migrate-legacy-links` | **migrate-legacy-links** | Replace legacy `index.php?controller=AdminXxx&token=...` links with Symfony route-based URL generation (`$this->generateUrl()`, `{{ path() }}`, `Routing.generate()`). Use when a module still constructs admin URLs using query-string controller names and security tokens. |
+| `dev` | `migrate-legacy-ajax` | **migrate-legacy-ajax** | Replace legacy AJAX patterns (`ajaxProcess*` methods in AdminController, `index.php?ajax=1&action=...`) with a dedicated Symfony route returning `JsonResponse`. Use when a module uses the legacy AJAX dispatch mechanism and must adopt modern routing. |
+| `dev` | `migrate-override-to-decorator` | **migrate-override-to-decorator** | Replace `override/classes/` or `override/controllers/` files with a Symfony service decorator (`#[AsDecorator]`) or event listener. Use when a module ships overrides that cause merge conflicts and must be replaced with a modern extension point. |
+| `dev` | `migrate-legacy-sql-to-doctrine-qb` | **migrate-legacy-sql-to-doctrine-qb** | Replace raw `Db::getInstance()->executeS()` / `->execute()` SQL with Doctrine DBAL Connection or ORM QueryBuilder. Use when a module scatters raw SQL throughout controllers and helpers and must adopt the PS 9 persistence layer. |
+| `dev` | `migrate-legacy-tabs-to-routes` | **migrate-legacy-tabs-to-routes** | Replace `Tab::installControllerClass()` / manual Tab object creation for admin menu entries with Symfony route-based tab registration using `_legacy_controller` in `config/routes.yml`. Use when a module registers admin tabs via legacy Tab API and must adopt the modern routing-based menu system. |
+| `dev` | `migrate-module-full-rewrite` | **migrate-module-full-rewrite** | Orchestrate a complete legacy-to-modern module rewrite by sequencing individual migration skills in the correct dependency order. Use when a module has multiple legacy patterns and needs a systematic, incremental migration plan. |
+| `dev` | `migrate-classic-to-hummingbird` | **migrate-classic-to-hummingbird** | Rebuild a Classic-derived theme using Hummingbird architecture (Bootstrap 5, BEM SCSS, TypeScript, data-ps-* bindings, no jQuery). Use when a shop runs a customized Classic theme and must move to the PS 9 Hummingbird-based stack. |
+| `dev` | `migrate-theme-jquery-to-vanilla` | **migrate-theme-jquery-to-vanilla** | Systematically remove jQuery from a theme's JavaScript, replacing with vanilla TypeScript and Hummingbird's `data-ps-*` binding pattern. Use when a theme still depends on jQuery and must adopt the PS 9 Hummingbird-style JS architecture. |
+| `dev` | `migrate-theme-css-to-bem-scss` | **migrate-theme-css-to-bem-scss** | Convert flat or unstructured CSS/SCSS into BEM component architecture with the layered SCSS structure Hummingbird uses. Use when a theme has monolithic stylesheets and must adopt component-level organization. |
+| `dev` | `migrate-theme-to-child` | **migrate-theme-to-child** | Convert a fully-forked theme into a proper child theme that inherits from its parent, keeping only actual overrides. Use when a theme was forked wholesale and maintaining it against parent updates has become costly. |
+| `dev` | `migrate-theme-smarty-deprecated` | **migrate-theme-smarty-deprecated** | Replace deprecated Smarty helpers, removed variables, and changed syntax with PS 9 equivalents. Use when a theme triggers deprecation warnings or breaks due to removed Smarty features after upgrading to PrestaShop 9. |
+
 ## 🗂️ Repository Structure
 
 The repository is organized by **application domains**. Currently, the supported
@@ -118,6 +141,7 @@ domains include:
 - [`autoupgrade`](#domain-autoupgrade) (Module Update Assistant)
 - [`module`](#domain-module) (PrestaShop 9 module development)
 - [`theme`](#domain-theme) (PrestaShop 9 theme development)
+- [`migration`](#domain-migration) (Legacy-to-modern PrestaShop 9 migration patterns)
 
 _(More domains like core and specific modules will be added over time)._
 
@@ -149,6 +173,11 @@ PrestaShop/skills/
 │   └── dev/              # Theme development skills
 │       ├── theme-create-from-hummingbird/
 │       ├── theme-add-bem-component/
+│       └── ...
+├── migration/            # Domain
+│   └── dev/              # Migration skills (legacy to modern)
+│       ├── migrate-admin-controller/
+│       ├── migrate-objectmodel-to-cqrs/
 │       └── ...
 └── README.md             # This file
 ```
