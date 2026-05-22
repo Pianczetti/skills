@@ -108,6 +108,12 @@ description: Replace legacy `index.php?controller=AdminXxx&token=...` links with
 - Don't pass `token=` manually; Symfony CSRF protection replaces the legacy token mechanism.
 - Don't remove legacy controller names from route defaults until all link sources are migrated.
 
+## Canonical examples
+
+- [devdocs - Migration guide: controller and routing](https://devdocs.prestashop-project.org/9/development/architecture/migration-guide/controller-routing/).
+- [devdocs - Modern controller and routing](https://devdocs.prestashop-project.org/9/development/architecture/modern/controller-routing/).
+- Working sample: [`example-modules/demomoduleroutes`](https://github.com/PrestaShop/example-modules/tree/master/demomoduleroutes).
+
 ## Related skills
 
 - `module-add-symfony-route` - declaring the route that replaces the legacy link.

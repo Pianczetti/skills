@@ -138,6 +138,12 @@ description: Replace raw `Db::getInstance()->executeS()` / `->execute()` SQL wit
 - Don't use `pSQL()` with Doctrine; parameter binding handles escaping.
 - Don't forget to register the repository in `config/services.yml` with autowire.
 
+## Canonical examples
+
+- [devdocs - Doctrine](https://devdocs.prestashop-project.org/9/modules/concepts/doctrine/).
+- [devdocs - Migration guide](https://devdocs.prestashop-project.org/9/development/architecture/migration-guide/).
+- Working sample: [`example-modules/demodoctrine`](https://github.com/PrestaShop/example-modules/tree/master/demodoctrine).
+
 ## Related skills
 
 - `migrate-objectmodel-to-doctrine` - migrating full ObjectModel entities to Doctrine ORM.

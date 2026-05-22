@@ -94,6 +94,11 @@ description: Orchestrate a complete legacy-to-modern module rewrite by sequencin
 - Don't skip the translations step; `$this->l()` calls in modern code trigger deprecation warnings.
 - Don't leave dead legacy files (old controllers, override/) in the final tree.
 
+## Canonical examples
+
+- [devdocs - Migration guide](https://devdocs.prestashop-project.org/9/development/architecture/migration-guide/).
+- [devdocs - Modules / Core updates](https://devdocs.prestashop-project.org/9/modules/core-updates/).
+
 ## Related skills
 
 - `migrate-legacy-translations` - step 1 in the migration order.
@@ -108,3 +113,5 @@ description: Orchestrate a complete legacy-to-modern module rewrite by sequencin
 - `migrate-legacy-links` - step 10.
 - `migrate-legacy-tabs-to-routes` - step 11.
 - `migrate-override-to-decorator` - step 12.
+- `module-validate` - the full validation pipeline to run after migration is complete.
+- `module-bump-compatibility` - checklist for bumping ps_versions_compliancy after completing the migration.
