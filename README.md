@@ -110,6 +110,23 @@ skills currently available:
 | `dev` | `theme-tdd-component` | **theme-tdd-component** | Drive a PrestaShop 9 theme component from a failing test - a Jest or Vitest unit test against a JSDOM fixture for behaviour, a Storybook story for visual review, and a Playwright E2E spec on a real PS instance for the full integration. Use whenever a new BEM component carries non-trivial JavaScript behaviour (cart updates, accordion, quick view, mobile menu). |
 | `dev` | `theme-validate` | **theme-validate** | Validate a PrestaShop 9 theme's structure end-to-end before packaging - YAML lint on `config/theme.yml`, required keys, `preview.png` dimensions (500 x 746), every `assets.css` / `assets.js` path resolves to a real file, install / uninstall round-trip via the CLI, and the official online Validator. Use as the last gate before `theme-export`. |
 
+## 🤖 Agent Definitions
+
+Agents orchestrate multiple skills into complex, multi-step workflows. While a skill performs a single focused task, an agent sequences many skills to accomplish a high-level goal (e.g. building an entire module from requirements, or running a full QA pass on a theme).
+
+| Agent | Description |
+| ----- | ----------- |
+| `module-creator` | Creates complete, production-ready PrestaShop 9 modules from scratch based on user requirements. |
+| `module-legacy-migrator` | Migrates legacy PrestaShop modules to modern PS 9 architecture pattern by pattern. |
+| `module-modifier` | Modifies existing modern PrestaShop 9 modules to add features, fix bugs, or extend functionality. |
+| `theme-creator` | Creates new PrestaShop 9 themes from scratch or from Hummingbird with full asset pipeline and accessibility baseline. |
+| `theme-legacy-migrator` | Migrates legacy/Classic-based PrestaShop themes to modern PS 9 Hummingbird architecture. |
+| `theme-modifier` | Modifies existing PrestaShop 9 themes to add pages, change layouts, add components, and adjust styling. |
+| `frontend-tester` | Tests PrestaShop 9 front-office themes with visual regression, accessibility, cross-browser, and performance audits. |
+| `backend-tester` | Tests PrestaShop 9 module back-end with unit tests, integration tests, API tests, and security audits. |
+
+Agent definitions live in the `agents/` directory. Each file describes the agent's role, the skills it uses, its standard workflow, and the rules it must follow.
+
 ## 🗂️ Repository Structure
 
 The repository is organized by **application domains**. Currently, the supported
@@ -134,6 +151,15 @@ audiences:
 
 ```text
 PrestaShop/skills/
+├── agents/               # Agent definitions (orchestrate skills)
+│   ├── module-creator.md
+│   ├── module-legacy-migrator.md
+│   ├── module-modifier.md
+│   ├── theme-creator.md
+│   ├── theme-legacy-migrator.md
+│   ├── theme-modifier.md
+│   ├── frontend-tester.md
+│   └── backend-tester.md
 ├── autoupgrade/          # Domain
 │   ├── user/             # User-facing operational skills
 │   │   ├── prestashop-update/
