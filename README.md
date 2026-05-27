@@ -80,11 +80,16 @@ skills currently available:
 | `dev` | `module-add-vue-config-page` | **module-add-vue-config-page** | Build a Vue 3 SPA configuration page for a PrestaShop 9 module, bundled with Vite, mounted from a modern Symfony admin controller, and backed by Admin API resources. Use when the configuration UI is too rich for Symfony Forms (drag-and-drop, live preview, multi-step wizards, dashboards). |
 | `dev` | `module-add-webservice-resource-legacy` | **module-add-webservice-resource-legacy** | Expose an entity through PrestaShop 9's legacy /api/ webservice by hooking addWebserviceResources from the module class. Use ONLY when integrating with a third-party that has not migrated to the modern Admin API. |
 | `dev` | `module-add-widget` | **module-add-widget** | Implement PrestaShop\PrestaShop\Core\Module\WidgetInterface in a PrestaShop 9 module so it can render reusable, cache-friendly content from any display hook. Use when the user wants the module to expose a block (sidebar, header, footer, product page extra content, etc.). |
+| `dev` | `module-addons-review-checklist` | **module-addons-review-checklist** | Run through the specific technical requirements that PrestaShop Addons Marketplace reviewers check before approving a module submission - security, structure, performance, translations, and clean uninstall. Use as a pre-submission gate after module-validate passes. |
 | `dev` | `module-bump-compatibility` | **module-bump-compatibility** | Update an existing PrestaShop module to support a newer minor or major (e.g. 8.x to 9.0, 9.0 to 9.1) - bump `ps_versions_compliancy`, migrate legacy patterns to modern equivalents, audit overrides and dependency constraints, and round-trip the install on the target. Use when the user wants to declare support for a new PS version. |
 | `dev` | `module-create` | **module-create** | Scaffold a new PrestaShop 9 module with the modern Symfony layout (PSR-4 src/, services.yml, routes.yml, translations). Use when the user wants to create a brand-new module from scratch. |
+| `dev` | `module-database-migration-patterns` | **module-database-migration-patterns** | Apply idempotent database schema evolution patterns specific to PrestaShop 9 modules - adding/removing/renaming columns, multi-lang and multi-shop tables, large table migrations, and index management. Use when the user needs to evolve a module's database schema safely across upgrades. |
+| `dev` | `module-database-rollback-strategy` | **module-database-rollback-strategy** | Handle rollbacks and failed migrations in PrestaShop 9 modules - backup tables, transaction wrapping, two-phase migrations, feature flags, and manual recovery. Use when the user needs to make destructive schema changes reversible or recover from a failed upgrade. |
 | `dev` | `module-make-multistore-aware` | **module-make-multistore-aware** | Make a PrestaShop 9 module behave correctly across multiple shops and shop groups. Use this checklist whenever the module reads or writes Configuration, queries the database, exposes a BO admin page, or ships CQRS commands and queries. |
 | `dev` | `module-package-zip` | **module-package-zip** | Build a clean, Marketplace-ready zip for a PrestaShop 9 module - no dev dependencies, no test artefacts, no dotfiles, with the correct `index.php` placeholders. Use right before publishing on the Marketplace, attaching to a GitHub release, or deploying to a managed shop. |
+| `dev` | `module-prepare-addons-submission` | **module-prepare-addons-submission** | Take a development-stage PrestaShop 9 module to a production-ready state compliant with PrestaShop Addons Marketplace requirements - metadata, security, file structure, translations, uninstall cleanliness, and Validator pass. Use when the user wants to submit a module to the Addons Marketplace for the first time. |
 | `dev` | `module-register-hooks` | **module-register-hooks** | Register hook listeners and dispatch custom hooks from a PrestaShop 9 module the modern way, using HookDispatcherInterface instead of the legacy Hook::exec(). Use when the user wants the module to react to core events or expose its own extension points. |
+| `dev` | `module-upgrade-workflow` | **module-upgrade-workflow** | Ship a complete module version upgrade to merchants who already have the module installed - version bump, upgrade scripts, hook/config changes, changelog, and Addons re-submission. Use when the user wants to release a new version of an existing module. |
 | `dev` | `module-validate` | **module-validate** | Run the full pre-publication validation pipeline against a PrestaShop 9 module - composer manifest, install/uninstall round-trip, naming and legacy-link linters, plus the official Marketplace validator. Use before opening a release PR or submitting to the Addons Marketplace. |
 
 ### Domain: `theme`
@@ -110,22 +115,6 @@ skills currently available:
 | `dev` | `theme-tdd-component` | **theme-tdd-component** | Drive a PrestaShop 9 theme component from a failing test - a Jest or Vitest unit test against a JSDOM fixture for behaviour, a Storybook story for visual review, and a Playwright E2E spec on a real PS instance for the full integration. Use whenever a new BEM component carries non-trivial JavaScript behaviour (cart updates, accordion, quick view, mobile menu). |
 | `dev` | `theme-validate` | **theme-validate** | Validate a PrestaShop 9 theme's structure end-to-end before packaging - YAML lint on `config/theme.yml`, required keys, `preview.png` dimensions (500 x 746), every `assets.css` / `assets.js` path resolves to a real file, install / uninstall round-trip via the CLI, and the official online Validator. Use as the last gate before `theme-export`. |
 
-## 🤖 Agent Definitions
-
-Agents orchestrate multiple skills into complex, multi-step workflows. While a skill performs a single focused task, an agent sequences many skills to accomplish a high-level goal (e.g. building an entire module from requirements, or running a full QA pass on a theme).
-
-| Agent | Description |
-| ----- | ----------- |
-| `module-creator` | Creates complete, production-ready PrestaShop 9 modules from scratch based on user requirements. |
-| `module-legacy-migrator` | Migrates legacy PrestaShop modules to modern PS 9 architecture pattern by pattern. |
-| `module-modifier` | Modifies existing modern PrestaShop 9 modules to add features, fix bugs, or extend functionality. |
-| `theme-creator` | Creates new PrestaShop 9 themes from scratch or from Hummingbird with full asset pipeline and accessibility baseline. |
-| `theme-legacy-migrator` | Migrates legacy/Classic-based PrestaShop themes to modern PS 9 Hummingbird architecture. |
-| `theme-modifier` | Modifies existing PrestaShop 9 themes to add pages, change layouts, add components, and adjust styling. |
-| `frontend-tester` | Tests PrestaShop 9 front-office themes with visual regression, accessibility, cross-browser, and performance audits. |
-| `backend-tester` | Tests PrestaShop 9 module back-end with unit tests, integration tests, API tests, and security audits. |
-
-Agent definitions live in the `agents/` directory. Each file describes the agent's role, the skills it uses, its standard workflow, and the rules it must follow.
 
 ## 🗂️ Repository Structure
 
@@ -135,6 +124,7 @@ domains include:
 - [`autoupgrade`](#domain-autoupgrade) (Module Update Assistant)
 - [`module`](#domain-module) (PrestaShop 9 module development)
 - [`theme`](#domain-theme) (PrestaShop 9 theme development)
+- [`migration`](#domain-migration) (Migrating legacy modules and themes to PS 9 modern stack)
 
 _(More domains like core and specific modules will be added over time)._
 
@@ -175,6 +165,11 @@ PrestaShop/skills/
 │   └── dev/              # Theme development skills
 │       ├── theme-create-from-hummingbird/
 │       ├── theme-add-bem-component/
+│       └── ...
+├── migration/            # Domain
+│   └── dev/              # Migration skills (legacy to modern PS 9)
+│       ├── migrate-admin-controller/
+│       ├── migrate-objectmodel-to-cqrs/
 │       └── ...
 └── README.md             # This file
 ```
