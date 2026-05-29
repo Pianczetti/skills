@@ -145,6 +145,37 @@ Ask the user:
 - Don't hardcode translation strings without the `Modules.Mymodule.Admin` domain.
 - Don't skip the multistore context. `Configuration::updateValue('K', 'v')` writes to ALL shops; pass `$shop_group_id`/`$shop_id` explicitly.
 
+## PS9 Module Compatibility Notes
+
+### Form Handler argument name
+
+PS9 `PrestaShop\Core\Form\Handler` expects `$formType`, NOT `$formBuilderType`:
+
+```yaml
+# WRONG
+$formBuilderType: 'MyVendor\Mymodule\Form\ConfigurationType'
+# CORRECT
+$formType: 'MyVendor\Mymodule\Form\ConfigurationType'
+```
+
+### TranslatorAwareType requires $locales
+
+If your FormType extends `TranslatorAwareType`, it needs `$locales` array (cannot be autowired). Either:
+1. Use `parent: 'form.type.translatable.aware'` + tag `form.type`
+2. Or extend `AbstractType` + inject `TranslatorInterface` manually
+
+### Dynamic choices in FormTypes
+
+Never use `'choices' => []`. Create a `ChoiceProvider` service with ALL arguments explicit:
+
+```yaml
+MyVendor\Mymodule\Form\ResourceChoiceProvider:
+  arguments:
+    $connection: '@doctrine.dbal.default_connection'
+    $dbPrefix: '%database_prefix%'
+    $languageId: "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+```
+
 ## Canonical examples
 
 - [devdocs - Modern configuration page](https://devdocs.prestashop-project.org/9/modules/creation/adding-configuration-page-modern/).

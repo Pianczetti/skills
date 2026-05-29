@@ -94,6 +94,50 @@ Ask the user:
 - Don't hardcode `index.php?controller=...` URLs in templates. Use `path()` with the route name.
 - Don't put DB queries or third-party API calls in actions; delegate to a service.
 
+## PS9 Module Compatibility Notes
+
+### No getContext() method
+
+`PrestaShopAdminController` does NOT have `getContext()`. Use typed context services:
+
+```php
+// WRONG
+$langId = $this->getContext()->language->id;
+
+// CORRECT
+use PrestaShop\PrestaShop\Core\Context\LanguageContext;
+
+public function indexAction(LanguageContext $languageContext): Response
+{
+    $langId = $languageContext->getId();
+}
+```
+
+### Restricted service locator
+
+Do NOT use `$this->container->get('service_id')` or `$this->get('service_id')`. Use dependency injection:
+
+```php
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+public function indexAction(
+    #[Autowire(service: 'mymodule.form.handler')] FormHandlerInterface $formHandler
+): Response { }
+```
+
+### trans() signature
+
+`PrestaShopAdminController::trans()` signature: `trans(string $id, array $parameters = [], ?string $domain = null)`
+
+```php
+// WRONG
+$this->trans('Saved', 'Modules.Mymodule.Admin');
+// CORRECT
+$this->trans('Saved', [], 'Modules.Mymodule.Admin');
+```
+
+Note: `TranslatorAwareTrait` in Form Types has different order: `trans(key, domain, parameters)`.
+
 ## Canonical examples
 
 - [devdocs - Admin controllers](https://devdocs.prestashop-project.org/9/modules/concepts/controllers/admin-controllers/).

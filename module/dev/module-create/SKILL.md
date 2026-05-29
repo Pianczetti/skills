@@ -100,6 +100,8 @@ Ask the user:
 - Inject `PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface` into your services to dispatch hooks.
 - Declare every service in `config/services.yml` and let autowiring resolve constructor arguments.
 - Keep the main module class thin: it is a registration point, not a place for business logic.
+- After deploying module files to a server, run `composer dump-autoload --no-dev --optimize` in the module directory. Without this, PSR-4 classes will not be resolved.
+- After any change to `config/services.yml` or `config/routes.yml`, clear the PrestaShop cache: `php bin/console cache:clear --env=prod` or remove `var/cache/prod/`.
 
 ## Don't
 

@@ -250,6 +250,66 @@ Ask the user:
 - Don't use raw `Db::getInstance()->insert()` / `->update()` for entities that are managed by Doctrine. Use the repository and `EntityManager::persist()` + `flush()`.
 - Don't ship Doctrine migrations that drop or alter core tables (`ps_product`, `ps_customer`, ...). Migrations belong inside your module's namespace (`mymod_*`) only.
 
+## PS9 Module Compatibility Notes
+
+### Annotations vs PHP 8 Attributes
+
+PrestaShop 9's `ModulesDoctrineCompilerPass` registers module entities using **AnnotationDriver**, NOT the PHP 8 Attribute driver. While the core codebase may use attributes, modules discovered via the compiler pass must use **docblock annotations**:
+
+```php
+// WRONG - causes MappingException in PS9 module context
+#[ORM\Entity(repositoryClass: VoucherRepository::class)]
+#[ORM\Table(name: 'mymod_voucher')]
+class Voucher { }
+
+// CORRECT - PS9 module entity mapping uses annotations
+/**
+ * @ORM\Entity(repositoryClass="MyVendor\Mymodule\Repository\VoucherRepository")
+ * @ORM\Table(name="mymod_voucher")
+ */
+class Voucher { }
+```
+
+This applies to ALL ORM mapping: `@ORM\Column`, `@ORM\Id`, `@ORM\GeneratedValue`, `@ORM\OneToMany`, `@ORM\ManyToOne`, `@ORM\JoinColumn`.
+
+### Table Prefix
+
+PrestaShop uses a configurable DB prefix (e.g. `ps_`, `ps0g_`). The raw table name in `@ORM\Table(name="mymod_voucher")` will NOT be auto-prefixed by Doctrine.
+
+**Solution:** Create a Doctrine event subscriber that prepends `%database_prefix%` to table names for your module's entity namespace:
+
+```php
+namespace MyVendor\Mymodule\Doctrine;
+
+use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+
+class TablePrefixSubscriber implements \Doctrine\Common\EventSubscriber
+{
+    public function __construct(private readonly string $prefix) {}
+
+    public function getSubscribedEvents(): array { return ['loadClassMetadata']; }
+
+    public function loadClassMetadata(LoadClassMetadataEventArgs $args): void
+    {
+        $metadata = $args->getClassMetadata();
+        if (!str_starts_with($metadata->getName(), 'MyVendor\\Mymodule\\Entity\\')) { return; }
+        $table = $metadata->getTableName();
+        if (!str_starts_with($table, $this->prefix)) {
+            $metadata->setPrimaryTable(['name' => $this->prefix . $table]);
+        }
+    }
+}
+```
+
+Register in `config/services.yml`:
+```yaml
+MyVendor\Mymodule\Doctrine\TablePrefixSubscriber:
+  arguments:
+    $prefix: '%database_prefix%'
+  tags:
+    - { name: doctrine.event_subscriber }
+```
+
 ## Canonical examples
 
 - [devdocs - Doctrine](https://devdocs.prestashop-project.org/9/modules/concepts/doctrine/) (covers entity discovery, the `--dump-sql` workflow, and the foreign-key warning).

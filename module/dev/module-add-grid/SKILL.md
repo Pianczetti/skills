@@ -348,6 +348,77 @@ Ask the user:
 - Don't return Doctrine entities or `ObjectModel` objects from the query builder; the Grid expects flat associative rows keyed by the SQL alias.
 - Don't omit `_legacy_controller` from the routes - the BO permission system and the bulk-action submit URL both need it.
 
+## PS9 Module Compatibility Notes
+
+### Language ID injection in QueryBuilders
+
+The parameter `%prestashop.default_lang_id%` does NOT exist in PS9. To inject the current admin language:
+
+```yaml
+# WRONG - parameter does not exist
+$languageId: '%prestashop.default_lang_id%'
+
+# CORRECT - use expression language with legacy context
+arguments:
+  - '@prestashop.core.query.doctrine_search_criteria_applicator'
+  - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+```
+
+### Delete actions must use SubmitRowAction (POST)
+
+Delete actions MUST use `SubmitRowAction` not `LinkRowAction`. Routes for delete must be `methods: [POST]`:
+
+```php
+use PrestaShop\PrestaShop\Core\Grid\Action\Row\Type\SubmitRowAction;
+
+(new SubmitRowAction('delete'))
+    ->setName($this->trans('Delete', [], 'Admin.Actions'))
+    ->setIcon('delete')
+    ->setOptions([
+        'route' => 'mymodule_entity_delete',
+        'route_param_name' => 'entityId',
+        'route_param_field' => 'id_entity',
+        'confirm_message' => $this->trans('Delete?', [], 'Admin.Notifications.Warning'),
+        'method' => 'POST',
+    ])
+```
+
+`ButtonBulkAction` does NOT support `confirm_message` -- only `SubmitBulkAction` does.
+
+### Grid JS initialization is mandatory
+
+The grid HTML alone does nothing. You must load JavaScript extensions:
+
+```javascript
+import Grid from '@PSJs/components/grid/grid';
+import SubmitRowActionExtension from '@PSJs/components/grid/extension/action/row/submit-row-action-extension';
+import SortingExtension from '@PSJs/components/grid/extension/sorting-extension';
+
+$(() => {
+  document.querySelectorAll('.js-grid').forEach((el) => {
+    const grid = new Grid(el.dataset.gridId);
+    grid.addExtension(new SubmitRowActionExtension());
+    grid.addExtension(new SortingExtension());
+  });
+});
+```
+
+Admin assets use `../modules/` prefix: `{{ asset('../modules/mymodule/views/js/admin-grid.js') }}`
+
+### layoutHeaderToolbarBtn for "Add new" button
+
+Grid index templates MUST set this variable for the toolbar button:
+
+```twig
+{% set layoutHeaderToolbarBtn = {
+  'add': {
+    'href': path('mymodule_entity_create'),
+    'desc': 'Add new'|trans({}, 'Modules.Mymodule.Admin'),
+    'icon': 'add_circle_outline'
+  }
+} %}
+```
+
 ## Canonical examples
 
 - [devdocs - Grid component](https://devdocs.prestashop-project.org/9/development/components/grid/).

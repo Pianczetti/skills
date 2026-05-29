@@ -82,6 +82,41 @@ Ask the user:
 - Don't use `$this->l(...)`. Use the Smarty `{l s='...' d='Modules.Mymodule.Shop'}` tag.
 - Don't bypass `setTemplate()` by `echo`-ing markup directly: it breaks theme inheritance and child themes.
 
+## PS9 Module Compatibility Notes
+
+### Do NOT type-hint inherited properties
+
+`ModuleFrontController` declares `$ssl`, `$auth`, `$authRedirection`, `$guestAllowed` WITHOUT types. PHP 8 forbids adding types to inherited properties:
+
+```php
+// WRONG - Fatal Error
+public bool $ssl = true;
+public bool $auth = false;
+
+// CORRECT
+public $ssl = true;
+public $auth = false;
+```
+
+### Admin asset paths
+
+In admin Twig templates, module assets need `../` prefix:
+```twig
+{# WRONG - 404 #}
+{{ asset('modules/mymodule/views/css/style.css') }}
+{# CORRECT #}
+{{ asset('../modules/mymodule/views/css/style.css') }}
+```
+
+### AJAX URL building with existing query params
+
+When routes already have `?_token=xxx`, use `URLSearchParams` to append parameters:
+```javascript
+var url = new URL(dataUrl, window.location.origin);
+url.searchParams.set('date', date);
+fetch(url.toString());
+```
+
 ## Canonical examples
 
 - [devdocs - Front controllers](https://devdocs.prestashop-project.org/9/modules/concepts/controllers/front-controllers/).
