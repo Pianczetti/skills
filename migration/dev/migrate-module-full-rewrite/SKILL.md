@@ -76,6 +76,7 @@ description: Orchestrate a complete module migration from legacy patterns to PS 
 
 ## Related skills
 
+- `migrate-legacy-admin-page` - phased orchestrator with feature-flag gating, Behat/Playwright test gates, and listing/form slices. Use that skill when the module has a legacy admin page and you want a structured, milestone-driven delivery. Use this skill (`migrate-module-full-rewrite`) when the module has no admin page or needs a pure pattern-by-pattern sweep.
 - `migrate-admin-controller` - controller migration.
 - `migrate-helperform-to-symfony-form` - form migration.
 - `migrate-helperlist-to-grid` - grid migration.
