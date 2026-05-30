@@ -180,3 +180,11 @@ Ask the user:
 - Core canonical layout: [`src/Core/Domain/Customer`](https://github.com/PrestaShop/PrestaShop/tree/develop/src/Core/Domain/Customer) and [`src/Core/Domain/Product`](https://github.com/PrestaShop/PrestaShop/tree/develop/src/Core/Domain/Product) under `PrestaShop/PrestaShop`.
 - Bus contract: [`CommandBusInterface`](https://github.com/PrestaShop/PrestaShop/blob/develop/src/Core/CommandBus/CommandBusInterface.php).
 - Run `bin/console prestashop:list:commands-and-queries` against any PrestaShop install to discover the existing commands and copy their conventions.
+
+## Related skills
+
+- `module-add-cqrs-bulk-command` to process a selection of ids in one dispatch (grid bulk actions) with collect-and-continue error handling.
+- `module-add-cqrs-query` for the read side dispatched on the same bus.
+- `module-add-grid` for the Back Office listing whose row/bulk actions dispatch these commands.
+- `module-add-doctrine-entity` for the repository the handler persists through.
+- `module-add-behat-tests` to specify the handler's behaviour (including constraint/error cases) through Gherkin scenarios.
