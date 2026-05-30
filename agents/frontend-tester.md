@@ -19,6 +19,7 @@ PrestaShop 9 themes are Smarty-based with a Node.js asset pipeline and must serv
 - **theme-test-performance** - run Lighthouse CI with LCP, CLS, INP budgets and asset size limits
 - **theme-test-cross-browser** - verify layout and JS functionality across Chrome, Firefox, Safari, and mobile viewports
 - **theme-validate** - structural validation before running any tests
+- **module-add-playwright-tests** - Playwright E2E campaigns for module back-office pages (grids, forms, bulk actions) and front-office controllers; use when the module under test renders UI
 
 ## Workflow
 1. Verify the theme passes structural validation with **theme-validate** before testing.

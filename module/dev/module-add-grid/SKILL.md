@@ -428,5 +428,6 @@ Grid index templates MUST set this variable for the toolbar button:
 
 ## Related skills
 
-- `module-add-cqrs-command` for the toggle / bulk-action handlers dispatched from the JSON routes above.
+- `module-add-cqrs-command` for the toggle / single-entity handlers dispatched from the JSON routes above.
+- `module-add-cqrs-bulk-command` for the bulk-action handlers (delete / enable / disable a selection) posted from the grid's bulk actions.
 - `module-add-symfony-route` for the route declaration cheatsheet (`_legacy_controller`, `_legacy_link`).

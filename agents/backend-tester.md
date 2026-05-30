@@ -14,6 +14,7 @@ PrestaShop 9 modules follow CQRS architecture with commands/queries on the Symfo
 ## Skills Used
 - **module-add-unit-tests** - scaffold PHPUnit for pure unit tests of handlers, value objects, and services
 - **module-add-integration-tests** - scaffold integration tests that boot the kernel and hit a real database
+- **module-add-behat-tests** - scaffold Behat (BDD) scenarios that drive CQRS handlers through the bus as business-readable behavioural specs
 - **module-add-api-tests** - test Admin API resources with OAuth2 flow, CRUD verification, and error handling
 - **module-security-audit** - run static analysis, taint checking, and a manual security checklist
 - **module-validate** - structural validation and install/uninstall round-trip
@@ -22,10 +23,11 @@ PrestaShop 9 modules follow CQRS architecture with commands/queries on the Symfo
 1. Run **module-validate** to verify the module installs and uninstalls cleanly before testing.
 2. Run **module-add-unit-tests** to scaffold or extend the PHPUnit suite. Write tests for every CQRS handler, value object constructor, and pure service method. Verify with `vendor/bin/phpunit --testsuite=unit`.
 3. Run **module-add-integration-tests** to scaffold tests that boot the PrestaShop kernel. Test CQRS handlers against a real database, verify controller responses, and validate hook dispatching end-to-end.
-4. If the module exposes Admin API resources, run **module-add-api-tests** to test the full HTTP request cycle: OAuth2 token acquisition, CRUD operations, validation errors, and authorization enforcement.
-5. Run **module-security-audit** to scan for SQL injection, XSS, CSRF vulnerabilities, insecure file uploads, broken access control, and dependency CVEs.
-6. Aggregate results into a quality report with pass/fail per layer and specific findings.
-7. Wire all test suites into CI with appropriate failure thresholds.
+4. Run **module-add-behat-tests** to specify domain behaviour as Gherkin scenarios driven through the command/query bus - cover CRUD, bulk-action partial failures, and constraint/error cases. Verify with `vendor/bin/behat --dry-run` then run against an installed shop.
+5. If the module exposes Admin API resources, run **module-add-api-tests** to test the full HTTP request cycle: OAuth2 token acquisition, CRUD operations, validation errors, and authorization enforcement.
+6. Run **module-security-audit** to scan for SQL injection, XSS, CSRF vulnerabilities, insecure file uploads, broken access control, and dependency CVEs.
+7. Aggregate results into a quality report with pass/fail per layer and specific findings.
+8. Wire all test suites into CI with appropriate failure thresholds.
 
 ## Rules
 - Always run `module-validate` first. A module that fails install/uninstall will produce meaningless test results.
@@ -33,7 +35,7 @@ PrestaShop 9 modules follow CQRS architecture with commands/queries on the Symfo
 - Integration tests require a running PS instance with the module installed. They test the full stack.
 - API tests require a running PS instance with Admin API enabled and valid OAuth2 credentials.
 - Security findings at Critical or High severity are build-breaking. The module must not ship with known vulnerabilities.
-- Never mark a module as "tested" if any layer is skipped. All four layers (unit, integration, API, security) are required for a complete assessment.
+- Never mark a module as "tested" if any layer is skipped. All four core layers (unit, integration, API, security) are required for a complete assessment; Behat behavioural scenarios are a recommended complement to integration tests for domain-heavy modules.
 - Test the sad paths: invalid input, missing permissions, expired tokens, duplicate operations.
 
 ## Output Expectations
